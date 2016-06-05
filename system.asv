@@ -1,0 +1,98 @@
+function varargout = system(varargin)
+% SYSTEM MATLAB code for system.fig
+%      SYSTEM, by itself, creates a new SYSTEM or raises the existing
+%      singleton*.
+%
+%      H = SYSTEM returns the handle to a new SYSTEM or the handle to
+%      the existing singleton*.
+%
+%      SYSTEM('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in SYSTEM.M with the given input arguments.
+%
+%      SYSTEM('Property','Value',...) creates a new SYSTEM or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before system_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to system_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help system
+
+% Last Modified by GUIDE v2.5 04-Jun-2016 23:26:51
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @system_OpeningFcn, ...
+                   'gui_OutputFcn',  @system_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before system is made visible.
+function system_OpeningFcn(hObject, ~, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to system (see VARARGIN)
+
+% Choose default command line output for system
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes system wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = system_OutputFcn(~, ~, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in OpenImage.
+function OpenImage_Callback(~, ~, handles)
+% hObject    handle to OpenImage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[filename,pathname]=uigetfile({'*.*';'*.bmp';'*.jpg';'*.tif';'*.jpg'},'选择图像');
+if isequal(filename,0)||isequal(pathname,0)
+  errordlg('您还没有选取图片！！','温馨提示');%如果没有输入，则创建错误对话框 
+  return;
+else
+    image=[pathname,filename];%合成路径+文件名
+    im=imread(image);%读取图像
+    k = waitforbuttonpress;              % 等待鼠标按下
+    point1 = get(gca,'CurrentPoint');    % 鼠标按下了              
+point2 = get(gca,'CurrentPoint');    % 鼠标松开了
+point1 = point1(1,1:2);              % 提取出两个点
+point2 = point2(1,1:2);
+
+    set(handles.axes1,'HandleVisibility','ON');%打开坐标，方便操作
+    axes(handles.axes1);%%使用图像，操作在坐标1
+    imshow(im);%在坐标axes1显示原图像 
+    title('原始图像');
+end
