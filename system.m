@@ -22,7 +22,7 @@ function varargout = system(varargin)
 
 % Edit the above text to modify the response to help system
 
-% Last Modified by GUIDE v2.5 05-Jun-2016 11:37:26
+% Last Modified by GUIDE v2.5 08-Jun-2016 02:26:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -226,43 +226,71 @@ function calcu_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 imgrgb=getappdata(system,'selectedImg');
     [m,n] = size(imgrgb);
-    imgrgb_t=imgrgb(:,:,:);
-    imgrgb_tt=imgrgb(:,:,:);
+    imgrgb_t=imgrgb(:,:,:);%缓存原图像
+    
+    imgrgb_Artery=imgrgb(:,:,:);%获取静脉图像
+    imgrgb_Vein=imgrgb(:,:,:);%获取动脉图像
     
     [m1,n1] = size(imgrgb_t);
     figure;
-    imshow(imgrgb_tt);
-    thresh = 35; %阈值
+    imshow(imgrgb_Artery);
+    threshArtery = 10; %静脉阈值
+    threshVeinLow = 19; %动脉阈值
+    threshVeinHigh = 30; %动脉阈值
     rb = 22;     %边界
     ll = rb;
     try
     for oi=rb+1:m1-rb-1
-        for oj=rb+1:n1-rb-1                    
-            if (imgrgb_t(oi-ll,oj)-imgrgb_t(oi,oj)>thresh)||...
-                    (imgrgb_t(oi,oj-ll)-imgrgb_t(oi,oj)>thresh)||...
-                    (imgrgb_t(oi-fix(ll/sqrt(2)),oj-fix(ll/sqrt(2)))-imgrgb_t(oi,oj)>thresh)||...
-                    (imgrgb_t(oi-fix(ll/sqrt(2)),oj+fix(ll/sqrt(2)))-imgrgb_t(oi,oj)>thresh)
-                imgrgb_tt(oi,oj)=0;
+        for oj=rb+1:n1-rb-1  
+            %deal artery
+            if (imgrgb_t(oi-ll,oj)-imgrgb_t(oi,oj)>threshArtery)||...
+                    (imgrgb_t(oi,oj-ll)-imgrgb_t(oi,oj)>threshArtery)||...
+                    (imgrgb_t(oi-fix(ll/sqrt(2)),oj-fix(ll/sqrt(2)))-imgrgb_t(oi,oj)>threshArtery)||...
+                    (imgrgb_t(oi-fix(ll/sqrt(2)),oj+fix(ll/sqrt(2)))-imgrgb_t(oi,oj)>threshArtery)
+                imgrgb_Artery(oi,oj)=0;
             else 
-                imgrgb_tt(oi,oj)=255;
+                imgrgb_Artery(oi,oj)=255;
             end
+            %deal end
+            
+            %deal vein
+            if (imgrgb_t(oi-ll,oj)-imgrgb_t(oi,oj)>threshVeinLow && imgrgb_t(oi-ll,oj)-imgrgb_t(oi,oj)<threshVeinHigh)||...
+                    (imgrgb_t(oi,oj-ll)-imgrgb_t(oi,oj)>threshVeinLow && imgrgb_t(oi,oj-ll)-imgrgb_t(oi,oj)<threshVeinHigh)||...
+                    (imgrgb_t(oi-fix(ll/sqrt(2)),oj-fix(ll/sqrt(2)))-imgrgb_t(oi,oj)>threshVeinLow && imgrgb_t(oi-fix(ll/sqrt(2)),oj-fix(ll/sqrt(2)))-imgrgb_t(oi,oj)<threshVeinHigh)||...
+                    (imgrgb_t(oi-fix(ll/sqrt(2)),oj+fix(ll/sqrt(2)))-imgrgb_t(oi,oj)>threshVeinLow && imgrgb_t(oi-fix(ll/sqrt(2)),oj+fix(ll/sqrt(2)))-imgrgb_t(oi,oj)<threshVeinHigh)
+                imgrgb_Vein(oi,oj)=0;
+            else 
+                imgrgb_Vein(oi,oj)=255;
+            end
+            %deal end   
         end
     end
     figure;
-    imshow(imgrgb_tt);
+    imshow(imgrgb_Artery);
     figure;
-    imga=im2bw(rgb2gray(imgrgb_tt));
-    imshow(imga);
+    imga_Artery=im2bw(rgb2gray(imgrgb_Artery));
+    imshow(imga_Artery);
     
-    [m2,n2]=size(imga);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+%     figure;
+%     imshow(imgrgb_Vein);
+%     figure;
+%     imga_ArteryVein=im2bw(rgb2gray(imgrgb_Vein));
+%     imshow(imga_ArteryVein);
+    
+    [m2,n2]=size(imga_Artery);
     line=m2-50;
     left_bound_pos=zeros(1,20);
     begin_=1;
     for oj=rb+1:n2-rb-1                    
-            if (imga(line,oj-1)==1&&imga(line,oj)==0&&imga(line,oj+1)==0)
+            if (imga_Artery(line,oj-1)==1&&imga_Artery(line,oj)==0&&imga_Artery(line,oj+1)==0)
                    left_bound_pos(begin_) = oj;begin_=begin_+1;
             end
-            if (imga(line,oj-1)==0&&imga(line,oj)==0&&imga(line,oj+1)==1)
+            if (imga_Artery(line,oj-1)==0&&imga_Artery(line,oj)==0&&imga_Artery(line,oj+1)==1)
                    left_bound_pos(begin_) = oj;begin_=begin_+1;
             end   
     end
@@ -282,7 +310,7 @@ imgrgb=getappdata(system,'selectedImg');
     min_radiu=maxlen;
     for si=mid_posx-fix(maxlen/2):mid_posx
         for sj=fix(mid_posy)-fix(maxlen/2):fix(mid_posy)
-            if(imga(si-1,sj)==1&&imga(si,sj)==0&&imga(si+1,sj)==0)
+            if(imga_Artery(si-1,sj)==1&&imga_Artery(si,sj)==0&&imga_Artery(si+1,sj)==0)
                 if(sqrt((si-mid_posx)^2+(sj-mid_posy)^2)<min_radiu)
                     min_radiu=sqrt((si-mid_posx)^2+(sj-mid_posy)^2);
                 end
@@ -290,7 +318,17 @@ imgrgb=getappdata(system,'selectedImg');
         end
     end
     width=2*min_radiu;
+    set(handles.Lartery,'string',num2str(width));
     text(maxr,line,[' \leftarrow' num2str(width)]);
     catch
         errordlg('您选择的区域过小，请重新选择','提示')
     end
+
+
+% --------------------------------------------------------------------
+function DocHelp_Callback(hObject, eventdata, handles)
+% hObject    handle to DocHelp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+web('https://github.com/AniChikage/-MedicalEyeImage/blob/master/README.md','-browser');
+
