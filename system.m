@@ -22,7 +22,7 @@ function varargout = system(varargin)
 
 % Edit the above text to modify the response to help system
 
-% Last Modified by GUIDE v2.5 08-Jun-2016 02:26:09
+% Last Modified by GUIDE v2.5 08-Jun-2016 16:22:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -234,7 +234,7 @@ imgrgb=getappdata(system,'selectedImg');
     [m1,n1] = size(imgrgb_t);
     figure;
     imshow(imgrgb_Artery);
-    threshArtery = 10; %静脉阈值
+    threshArtery = 35; %静脉阈值
     threshVeinLow = 19; %动脉阈值
     threshVeinHigh = 30; %动脉阈值
     rb = 22;     %边界
@@ -332,3 +332,17 @@ function DocHelp_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 web('https://github.com/AniChikage/-MedicalEyeImage/blob/master/README.md','-browser');
 
+
+
+% --- Executes during object creation, after setting all properties.
+function figure1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on mouse press over figure background.
+function figure1_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
